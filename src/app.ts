@@ -5,9 +5,7 @@ import { config } from "dotenv";
 const app = express();
 config();
 const port = 9000;
-// @TODO: remove username/password from repo - this should be an environment variable
-const uri =
-  "mongodb+srv://eps11:OxoSFfmcae3sIhcz@cluster0-0fcm1.mongodb.net/polls?retryWrites=true&w=majority";
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0-0fcm1.mongodb.net/polls?retryWrites=true&w=majority`;
 
 app.get("/", (req, res) => {
   res.send("The sedulous hyena ate the antelope!");
@@ -19,7 +17,7 @@ app.listen(port, (err) => {
   }
 
   connect(
-    `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0-0fcm1.mongodb.net/polls?retryWrites=true&w=majority`,
+    uri,
     {
       useUnifiedTopology: true,
     },
