@@ -1,6 +1,7 @@
 import express from "express";
 import { connect } from "mongodb";
 import { config } from "dotenv";
+import { v4 as uuid } from "uuid";
 
 const app = express();
 config();
@@ -29,7 +30,17 @@ app.listen(port, (err) => {
       const db = client.db("poll-app");
       const polls = db.collection("polls");
 
-      app.get("/polls", (req, res) => {
+      app.get("/polls", async (req, res) => {
+        const foundPolls = await polls.find().toArray();
+
+        console.log(foundPolls);
+
+        res.send(foundPolls.toString());
+      });
+
+      app.get("/polls/:id", (req, res) => {
+        const { id } = req.params;
+
         polls.findOne({ title: "cunt" }).then((poll) => {
           console.log(poll);
 
@@ -38,8 +49,9 @@ app.listen(port, (err) => {
       });
 
       app.post("/polls", (req, res) => {
+        const pollId = uuid();
         polls
-          .insertOne(req.body)
+          .insertOne({ ...req.body, pollId })
           .then((result: any) => {
             console.log(result);
           })
