@@ -24,7 +24,7 @@ export function connectWithApp(app: Express) {
   }).then((client: MongoClient) => {
     console.log("Connected to database");
     const db = client.db("poll-app");
-    const polls = db.collection("polls");
+    const polls = db.collection<Poll>("polls");
 
     app.get("/polls", async (req, res) => {
       const foundPolls = await polls.find().toArray();
@@ -68,14 +68,17 @@ export function connectWithApp(app: Express) {
       const { id } = req.params;
       const { vote } = req.body;
 
-      console.log(vote);
-      console.log(id);
-
-      res.send({ error: true });
-
-      // @TODO: use positional filtered identifier syntax to match elements in nested array!!
-
-      // const updated = polls.updateOne({ pollId: id ));
+      polls
+        .updateOne(
+          { pollId: id },
+          { $inc: { "options.$[element].votes": 1 } },
+          {
+            arrayFilters: [{ "element.id": vote }],
+          }
+        )
+        .then((poll) => {
+          res.send({ data: { success: true } });
+        });
     });
   });
 }
