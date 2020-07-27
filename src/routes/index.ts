@@ -3,6 +3,7 @@ import { Express } from "express";
 import { v4 as uuid } from "uuid";
 import { Request } from "express";
 import APP_ENV from "../utils/environment";
+import { voteEmitter } from "../app";
 
 export type Poll = {
   pollId?: string;
@@ -18,6 +19,11 @@ interface PollOption {
 
 const uri = `mongodb+srv://${APP_ENV.DB_USER}:${APP_ENV.DB_PASSWORD}@cluster0-0fcm1.mongodb.net/polls?retryWrites=true&w=majority`;
 
+/**
+ * Connects our Mongo instance with the Express application so we can interact with the Mongo client.
+ *
+ * @param app - The express app containing our routes
+ */
 export function connectWithApp(app: Express) {
   connect(uri, {
     useUnifiedTopology: true,
@@ -68,6 +74,9 @@ export function connectWithApp(app: Express) {
       const { id } = req.params;
       const { vote } = req.body;
 
+      // Emit the new vote to all listeners.
+      voteEmitter.emit("newVote", vote);
+
       polls
         .updateOne(
           { pollId: id },
@@ -76,7 +85,7 @@ export function connectWithApp(app: Express) {
             arrayFilters: [{ "element.id": vote }],
           }
         )
-        .then((poll) => {
+        .then(() => {
           res.send({ data: { success: true } });
         });
     });
