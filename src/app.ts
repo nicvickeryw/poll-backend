@@ -32,18 +32,18 @@ const server = app.listen(port, async (err) => {
 const io = require("socket.io")(server);
 
 io.on("connection", (client: any) => {
-  // @TODO: this does not remove the old emitter...
-  voteEmitter.on("newVote", (voteId) => {
-    console.log("voted for poll");
-
+  const voteForPoll = (voteId: string) => {
     client.emit("votes", voteId);
-  });
+  };
+
+  voteEmitter.on("newVote", voteForPoll);
 
   client.on("subscribeToVotes", (pollId: string) => {
     console.log("subbing to votes");
   });
 
   client.on("disconnect", () => {
-    // voteEmitter.removeAllListeners();
+    console.log("client disconnected!");
+    voteEmitter.removeListener("newVote", voteForPoll);
   });
 });
