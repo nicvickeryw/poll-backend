@@ -3,6 +3,7 @@ export interface ENVIRONMENT {
   DB_USER: string;
   DB_PASSWORD: string;
   FRONT_END_ORIGIN_URI: string;
+  PORT: number;
 }
 
 import { config } from "dotenv";

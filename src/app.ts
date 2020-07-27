@@ -14,7 +14,7 @@ app.use(
   jsonParser,
   urlencodedParser
 );
-const port = 9000;
+const port = APP_ENV.PORT;
 
 app.listen(port, async (err) => {
   if (err) {
