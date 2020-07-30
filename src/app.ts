@@ -38,10 +38,6 @@ io.on("connection", (client: any) => {
 
   voteEmitter.on("newVote", voteForPoll);
 
-  client.on("subscribeToVotes", (pollId: string) => {
-    console.log("subbing to votes");
-  });
-
   client.on("disconnect", () => {
     console.log("client disconnected!");
     voteEmitter.removeListener("newVote", voteForPoll);

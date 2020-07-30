@@ -32,6 +32,10 @@ export function connectWithApp(app: Express) {
     const db = client.db("poll-app");
     const polls = db.collection<Poll>("polls");
 
+    app.get("/", async (req, res) => {
+      res.send("Hello world!");
+    });
+
     app.get("/polls", async (req, res) => {
       const foundPolls = await polls.find().toArray();
       res.send({ polls: foundPolls });
