@@ -29,32 +29,24 @@ export function connectWithApp(app: Express) {
     useUnifiedTopology: true,
   }).then((client: MongoClient) => {
     console.log("Connected to database");
+
     const db = client.db("poll-app");
     const polls = db.collection<Poll>("polls");
-
-    app.get("/", async (req, res) => {
-      res.send("Hello world!");
-    });
 
     app.get("/polls", async (req, res) => {
       const foundPolls = await polls.find().toArray();
       res.send({ polls: foundPolls });
     });
 
-    app.get("/polls/:id", (req, res) => {
+    app.get("/polls/:id", async (req, res) => {
       const { id } = req.params;
 
-      polls
-        .findOne({ pollId: id })
-        .then((poll) => {
-          res.send(poll);
-        })
-        .catch((error: any) => console.error(error));
+      res.send(await polls.findOne({ pollId: id }));
     });
 
     app.post(
       "/poll",
-      (req: Request<Record<string, string>, any, Poll>, res) => {
+      async (req: Request<Record<string, string>, any, Poll>, res) => {
         const pollId = uuid();
         // Add extra uuids to each selected option, so we can track selection.
         const body = {
@@ -65,33 +57,30 @@ export function connectWithApp(app: Express) {
           })),
         };
 
-        polls
-          .insertOne({ ...body, pollId })
-          .then(({ ops }: any) => {
-            res.send(ops.pop());
-          })
-          .catch((error: any) => console.error(error));
+        const addedPoll = (
+          await polls.insertOne({ ...body, pollId })
+        ).ops.pop();
+
+        res.send(addedPoll);
       }
     );
 
-    app.put("/poll/:id", (req, res) => {
+    app.put("/poll/:id", async (req, res) => {
       const { id } = req.params;
       const { vote } = req.body;
 
       // Emit the new vote to all listeners.
       voteEmitter.emit("newVote", vote);
 
-      polls
-        .updateOne(
-          { pollId: id },
-          { $inc: { "options.$[element].votes": 1 } },
-          {
-            arrayFilters: [{ "element.id": vote }],
-          }
-        )
-        .then(() => {
-          res.send({ data: { success: true } });
-        });
+      await polls.updateOne(
+        { pollId: id },
+        { $inc: { "options.$[element].votes": 1 } },
+        {
+          arrayFilters: [{ "element.id": vote }],
+        }
+      );
+
+      res.send({ data: { success: true } });
     });
   });
 }

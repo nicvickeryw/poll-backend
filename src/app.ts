@@ -39,7 +39,6 @@ io.on("connection", (client: any) => {
   voteEmitter.on("newVote", voteForPoll);
 
   client.on("disconnect", () => {
-    console.log("client disconnected!");
     voteEmitter.removeListener("newVote", voteForPoll);
   });
 });
