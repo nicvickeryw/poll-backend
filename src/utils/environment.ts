@@ -1,7 +1,6 @@
 export interface ENVIRONMENT {
   NODE_ENV: string;
-  DB_USER: string;
-  DB_PASSWORD: string;
+  DB_CONNECTION_STRING: string;
   FRONT_END_ORIGIN_URI: string;
   PORT: number;
 }

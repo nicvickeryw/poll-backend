@@ -17,15 +17,13 @@ interface PollOption {
   votes: number;
 }
 
-const uri = `mongodb+srv://${APP_ENV.DB_USER}:${APP_ENV.DB_PASSWORD}@cluster0-0fcm1.mongodb.net/polls?retryWrites=true&w=majority`;
-
 /**
  * Connects our Mongo instance with the Express application so we can interact with the Mongo client.
  *
  * @param app - The express app containing our routes
  */
 export function connectWithApp(app: Express) {
-  connect(uri, {
+  connect(APP_ENV.DB_CONNECTION_STRING, {
     useUnifiedTopology: true,
   }).then((client: MongoClient) => {
     console.log("Connected to database");
